@@ -2,9 +2,11 @@
 
 #include <list>
 #include <limits>
+#include <utility>
 
 using vertex = size_t;
 using weight = int;
+using edge = std::tuple<vertex, vertex, weight>;
 
 class Graph
 {

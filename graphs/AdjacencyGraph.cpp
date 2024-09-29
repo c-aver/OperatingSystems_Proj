@@ -3,7 +3,7 @@
 
 using std::vector, std::pair, std::tuple;
 
-AdjacencyGraph::AdjacencyGraph(size_t vertices, vector<tuple<vertex, vertex, weight>> edges)
+AdjacencyGraph::AdjacencyGraph(size_t vertices, vector<edge> edges)
 {
     this->adjacency_matrix.reserve(vertices);
     vector<weight> empty_row(vertices, Graph::no_edge);
