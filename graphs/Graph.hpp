@@ -15,12 +15,7 @@ public:
         vertex a;
         vertex b;
         weight w;
-        edge(vertex a, vertex b, weight w)
-        {
-            this->a = a;
-            this->b = b;
-            this->w = w;
-        }
+        edge(vertex a, vertex b, weight w) : a(a), b(b), w(w) {}
     };
     static constexpr weight no_edge = std::numeric_limits<weight>::max();
     virtual ~Graph() = default;
