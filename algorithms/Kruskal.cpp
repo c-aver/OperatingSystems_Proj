@@ -10,7 +10,9 @@
 
 Subgraph kruskal(Graph *g)
 {
-    std::set<Graph::edge> result;
+    Subgraph result(*g);
+    for (vertex v = 0; v < g->get_vertex_count(); ++v)
+        result.add_vertex(v);
     std::size_t count = g->get_vertex_count();
     // union-find data structure "members"
     std::vector<vertex> parent(count);
@@ -55,9 +57,9 @@ Subgraph kruskal(Graph *g)
         auto &[a, b, _] = e;
         if (find_set(a) != find_set(b))
         {
-            result.insert(e); // TODO: with subgraph
+            result.add_edge(a, b);
             union_sets(a, b);
         }
     }
-    return Subgraph();
+    return result;
 }
