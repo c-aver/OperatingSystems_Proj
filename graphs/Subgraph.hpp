@@ -1,4 +1,6 @@
-class Subgraph
+#include "Graph.hpp"
+
+class Subgraph : public Graph
 {
 
 };

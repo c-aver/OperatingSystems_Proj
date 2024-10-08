@@ -55,7 +55,7 @@ Subgraph kruskal(Graph *g)
         auto &[a, b, _] = e;
         if (find_set(a) != find_set(b))
         {
-            result.insert(e);
+            result.insert(e); // TODO: with subgraph
             union_sets(a, b);
         }
     }
