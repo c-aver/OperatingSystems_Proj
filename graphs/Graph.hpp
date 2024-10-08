@@ -32,3 +32,8 @@ inline bool operator<(const Graph::edge a, const Graph::edge b)
 {
     return a.w < b.w;
 }
+
+inline bool operator==(const Graph::edge a, const Graph::edge b)
+{
+    return a.a == b.a && b.a == b.b && a.w == b.w;
+}
