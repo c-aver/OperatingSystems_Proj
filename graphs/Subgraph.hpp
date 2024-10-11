@@ -3,17 +3,35 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <cstring>
+#include <cstdio>
 #include "Graph.hpp"
 
-class vertex_not_in_subgraph_exception
+class vertex_not_in_subgraph_exception : std::exception
 {
 private:
+    static inline constexpr char MESSAGE_FORMAT[] = "Vertex %zu is not in the subgraph";
+    static constexpr size_t MESSAGE_LEN = std::strlen(MESSAGE_FORMAT) - 3 + std::numeric_limits<vertex>::digits10 + 1;
     vertex v;
+    char *message;
+
 public:
-    vertex_not_in_subgraph_exception(vertex v) : v(v) {}
+    vertex_not_in_subgraph_exception(vertex v) : v(v)
+    {
+        message = (char *) malloc(sizeof(char)*MESSAGE_LEN);
+        std::snprintf(message, MESSAGE_LEN, MESSAGE_FORMAT, v);
+    }
+    ~vertex_not_in_subgraph_exception()
+    {
+        free(message);
+    }
     vertex get_vertex()
     {
         return v;
+    }
+    const char *what() const noexcept
+    {
+        return message;
     }
 };
 
