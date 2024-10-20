@@ -24,6 +24,7 @@ clean:
 	$(MAKE) -C $(ALGORITHMS_DIR) clean
 	$(MAKE) -C $(GRAPHS_DIR) clean
 	$(MAKE) -C $(PATTERN_LIB_DIR) clean
+	rm -rf $(BUILD_DIR)
 	rm -f *.o $(MAIN)
 
 .PHONY: all clean
