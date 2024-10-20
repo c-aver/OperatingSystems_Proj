@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <sstream>
 #include <fcntl.h>
+#include <mutex>
+#include <shared_mutex>
 
 #include "pattern_library/leader_follower.hpp"
 #include "algorithms/Kruskal.hpp"
@@ -26,6 +28,7 @@ using std::cin, std::cout, std::set, std::string;
 
 Graph *g = nullptr;
 LeaderFollower lf;
+std::shared_mutex graph_mutex;
 
 /**
  * @brief Receive a message from the client
@@ -58,31 +61,47 @@ bool handle_user_input(int fd, string input)
     std::istringstream is(input);
     string command;
     std::getline(is, command, ' ');
-    if (command == "Kosaraju") // TODO: replace
+    if (command == "MST")
     {
-        if (!g)
         {
-            if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+            std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+            if (!g)
             {
-                throw std::runtime_error("Error sending a message to the client");
+                if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
+                return false;
             }
-            return false;
         }
-        // auto comps = kosaraju(*g);
-        string message;
-        // message += "The strongly connected components are: \n";
-        // for (auto comp : comps)
-        // {
-        //     for (vertex v : comp)
-        //     {
-        //         message += std::to_string(v) + ' ';
-        //     }
-        //     message += '\n';
-        // }
-        if (send_message(fd, message))
+        string algo_name;
+        std::getline(is, algo_name);
+        std::stringstream buffer;
+        {
+            std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+            mst_strat_t *algo = mst_strategy(algo_name);
+            Subgraph MST_Graph = algo(g);
+            double total_MST_weight = total_weight(&MST_Graph);
+            double average_distance = average_distance_between_two_vertices(&MST_Graph);
+            double shortest_distance = shortest_distance_between_two_vertices(&MST_Graph);
+            double longest_distance = longest_distance_between_two_vertices(&MST_Graph);
+
+            buffer << "The MST is: \n";
+            for (auto &[u, v, w] : MST_Graph.get_edges())
+            {
+                buffer << "(" << u << ", " << v << ") With weight: " << w << '\n';
+            }
+
+            buffer << "The total weight of the MST is: " << total_MST_weight << '\n';
+            buffer << "The average distance between two vertices in the MST is: " << average_distance << '\n';
+            buffer << "The shortest distance between two vertices in the MST is: " << shortest_distance << '\n';
+            buffer << "The longest distance between two vertices in the MST is: " << longest_distance << '\n';
+        }
+        if (send_message(fd, buffer.str()))
         {
             throw std::runtime_error("Error sending a message to the client");
         }
+
         return false;
     }
     else if (command == "Newgraph")
@@ -98,37 +117,52 @@ bool handle_user_input(int fd, string input)
             }
         }
         size_t n = strtoull(param1.c_str(), nullptr, 10), m = strtoull(param2.c_str(), nullptr, 10);
-        if (g)
-            delete g;
-        std::vector<std::pair<vertex, vertex>> edges;
-        for (size_t i = 0; i < m; ++i)
         {
-            vertex src, dst;
-            string received_edge = receive_message(fd);
-            cout << "Received edge: " << received_edge << std::endl;
-            char *space;
-            src = strtoull(received_edge.c_str(), &space, 10); // TODO: parse weight
-            dst = strtoull(space + 1, nullptr, 10);
-            cout << "Parsed edge: " << src << " " << dst << std::endl;
-            edges.push_back(std::make_pair(src, dst));
+            std::unique_lock<std::shared_mutex> graph_lock(graph_mutex);
+            if (g)
+                delete g;
+
+            std::vector<Graph::edge> edges;
+            for (size_t i = 0; i < m; ++i)
+            {
+                vertex src, dst;
+                weight w;
+                string received_edge = receive_message(fd);
+                std::istringstream edge_stream(received_edge);
+                cout << "Received edge: " << received_edge << std::endl;
+                if (edge_stream >> src >> dst >> w)
+                {
+                    cout << "Parsed edge: " << src << " " << dst << std::endl;
+                    edges.push_back(Graph::edge(src, dst, w));
+                }
+                else
+                {
+                    cout << "Failed to parse edge: " << received_edge << std::endl;
+                }
+            }
+            g = new AdjacencyGraph(n, edges);
         }
-        // g = new AdjacencyGraph(n, edges);
         return false;
     }
-    else if (command == "Newedge")
+    else if (command == "Newedge" || command == "Updateedge")
     {
-        if (!g)
         {
-            if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+            std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+
+            if (!g)
             {
-                throw std::runtime_error("Error sending a message to the client");
+                if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
+                return false;
             }
-            return false;
         }
-        std::string param1, param2; // TODO: parse weight
+        std::string param1, param2, edge_weight;
         std::getline(is, param1, ',');
-        std::getline(is, param2);
-        if (param1.length() == 0 || param2.length() == 0)
+        std::getline(is, param2, ',');
+        std::getline(is, edge_weight);
+        if (param1.length() == 0 || param2.length() == 0 || edge_weight.length() == 0)
         {
             if (send_message(fd, "Not enough parameters detected, command ignored\n"))
             {
@@ -136,31 +170,40 @@ bool handle_user_input(int fd, string input)
             }
         }
         vertex src = strtoull(param1.c_str(), nullptr, 10), dst = strtoull(param2.c_str(), nullptr, 10);
-        if (!(g)->set_edge(src, dst, 0)) // TODO: replace 0 with parsed weight
+        weight w = strtod(edge_weight.c_str(), nullptr);
         {
-            if (send_message(fd, "Edge already exists\n"))
+            std::unique_lock<std::shared_mutex> graph_lock(graph_mutex);
+
+            if (!(g)->set_edge(src, dst, w))
             {
-                throw std::runtime_error("Error sending a message to the client");
+                if (send_message(fd, "Edge already exists\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
             }
-        }
-        else
-        {
-            if (send_message(fd, "Edge was created successfuly\n"))
+            else
             {
-                throw std::runtime_error("Error sending a message to the client");
+                if (send_message(fd, "Edge was created successfuly\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
             }
         }
         return false;
-    } // TODO: add Updateedge command?
+    }
     else if (command == "Removeedge")
     {
-        if (!g)
         {
-            if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+            std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+
+            if (!g)
             {
-                throw std::runtime_error("Error sending a message to the client");
+                if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
+                return false;
             }
-            return false;
         }
         std::string param1, param2;
         std::getline(is, param1, ',');
@@ -173,18 +216,22 @@ bool handle_user_input(int fd, string input)
             }
         }
         vertex src = strtoull(param1.c_str(), nullptr, 10), dst = strtoull(param2.c_str(), nullptr, 10);
-        if (!(g)->remove_edge(src, dst))
         {
-            if (send_message(fd, "Edge does not exist\n"))
+            std::unique_lock<std::shared_mutex> graph_lock(graph_mutex);
+
+            if (!(g)->remove_edge(src, dst))
             {
-                throw std::runtime_error("Error sending a message to the client");
+                if (send_message(fd, "Edge does not exist\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
             }
-        }
-        else
-        {
-            if (send_message(fd, "Edge was removed successfuly\n"))
+            else
             {
-                throw std::runtime_error("Error sending a message to the client");
+                if (send_message(fd, "Edge was removed successfuly\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
             }
         }
         return false;
@@ -220,7 +267,7 @@ void message_handler(int fd)
         return;
     }
     input.pop_back(); // Remove the newline character
-    if(handle_user_input(fd, input))
+    if (handle_user_input(fd, input))
     {
         return; // The user requested to close the connection, so we don't need to send a message
     }
