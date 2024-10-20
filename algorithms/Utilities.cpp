@@ -4,9 +4,14 @@
 double total_weight(Subgraph *g)
 {
     return std::accumulate(g->get_edges().begin(), g->get_edges().end(), 0.0, [](double acc, Graph::edge e)
-                           { return acc + e.w; });
+                           { return acc + e.w; });  // The total weight of the MST is the sum of all the edges' weights
 }
 
+/**
+ * @brief Find the longest path in a graph between two vertices
+ * Is used for the longest_distance_between_two_vertices function
+ * @return The weight of the longest path from the start vertex to one of its descendants
+ */
 double find_longest_path(Subgraph *g, vertex start, vertex parent)
 {
     std::list<std::pair<vertex, weight>> neighbours = g->get_neighbors(start);
@@ -23,7 +28,7 @@ double find_longest_path(Subgraph *g, vertex start, vertex parent)
     double max = 0;
     for (auto n : neighbours)
     {
-        if (n.first == start)
+        if (n.first == parent)
             continue;
         double distance = n.second + find_longest_path(g, n.first, start);
         if (distance > max)
@@ -34,9 +39,16 @@ double find_longest_path(Subgraph *g, vertex start, vertex parent)
 
 double longest_distance_between_two_vertices(Subgraph *g, vertex start, vertex parent)
 {
+    // We will check 4 cases:
+
+    // 1. The longest path is from the start vertex to itself (The MST is a single vertex)
     if (start == parent || start >= g->get_vertex_count())
         return 0;
+
+    // 2. The longest path is from the start vertex to one of its descendants.
     double path_from_start = find_longest_path(g, start, parent);
+
+    // 3. The longest path goes through the start vertex.
     double path_from_start_with_childs = 0;
     std::list<std::pair<vertex, weight>> neighbours = g->get_neighbors(start);
     if (neighbours.size() > 1)
@@ -52,6 +64,7 @@ double longest_distance_between_two_vertices(Subgraph *g, vertex start, vertex p
         path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
     }
 
+    // 4. The longest path is from one of the start vertex's descendants to another descendant, but doesn't go through the start vertex.
     double path_from_childs = 0;
     for (auto v : g->get_neighbors(start))
     {
@@ -73,24 +86,31 @@ double longest_distance_between_two_vertices(Subgraph *g, vertex start, vertex p
  */
 double longest_distance_between_two_vertices(Subgraph *g)
 {
-    vertex start = g->get_vertices().front();
-    double path_from_start = find_longest_path(g, start, g->get_vertex_count() + 1); // start has no parent
+    // We will check 4 cases:
 
+    // 1. The longest path is from the start vertex to one of its descendants.
+    vertex start = g->get_vertices().front();   // Start from the first vertex in the MST
+    double path_from_start = find_longest_path(g, start, g->get_vertex_count() + 1); // start vx has no parent (g->get_vertex_count() + 1)
+
+    // 2. The longest path goes through the start vertex.
     double path_from_start_with_childs = 0;
     std::list<std::pair<vertex, weight>> neighbours = g->get_neighbors(start);
     if (neighbours.size() > 1)
     {
+        // Sort the neighbours by weight in descending order
         neighbours.sort([](const std::pair<vertex, weight> &a, const std::pair<vertex, weight> &b)
                   { return a.second > b.second; });
+        // Get the two neighbours with the highest weights
         path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
         neighbours.pop_front();
         path_from_start_with_childs += neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
     }
-    else if (neighbours.size() == 1)
+    else if (neighbours.size() == 1)    // If there's only one neighbour
     {
         path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
     }
 
+    // 3. The longest path is from one of the start vertex's descendants to another descendant, but doesn't go through the start vertex.
     double path_from_childs = 0;
     for (auto v : g->get_neighbors(start))
     {
@@ -106,7 +126,10 @@ double average_distance_between_two_vertices(Subgraph *g)
 {
     // The idea: find how many paths go through each edge. Each edge splits the graph into two parts.
     // The number of paths that go through an edge is the number of vertices in one part times the number of vertices in the other part.
+    
     std::map<vertex, size_t> descendents;
+
+    // A recursive lambda function that sets the number of descendents of each vertex
     std::function<size_t(vertex, vertex)> set_descendents = [&descendents, &set_descendents, &g](vertex v, vertex parent)
     {
         descendents[v] = 1;
@@ -119,7 +142,7 @@ double average_distance_between_two_vertices(Subgraph *g)
         return descendents[v];
     };
 
-    set_descendents(g->get_vertices().front(), g->get_vertex_count()); // Start from the first vertex
+    set_descendents(g->get_vertices().front(), g->get_vertex_count()); // Start from the first vertex. which has no parent.
 
     double total_weight = 0.0;
     for (auto &[u, v, w] : g->get_edges())
