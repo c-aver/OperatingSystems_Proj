@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
-#define DEBUG
+// #define DEBUG
 
 using std::string;
 mst_strat_t *mst_strategy(string algo_name)

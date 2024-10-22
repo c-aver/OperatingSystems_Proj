@@ -25,7 +25,7 @@
 #define MAX_USERS 5
 #define MAX_SEGMENT_SIZE 65535
 
-#define DEBUG
+// #define DEBUG
 
 using std::cin, std::cout, std::set, std::string;
 

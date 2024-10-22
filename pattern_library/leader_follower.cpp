@@ -8,7 +8,7 @@
 
 #include "leader_follower.hpp"
 
-#define DEBUG
+// #define DEBUG
 
 LeaderFollower::LeaderFollower(size_t pool_size) : running(true), has_leader(false), fds_count(0)
 {
