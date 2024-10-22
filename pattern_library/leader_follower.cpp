@@ -144,5 +144,6 @@ void LeaderFollower::lead()
             }
         }
         vectors_lock.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(LEADER_FOLLOWER_POLL_TIMEOUT));
     }
 }
