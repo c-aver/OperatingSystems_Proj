@@ -200,5 +200,11 @@ double average_distance_between_two_vertices(Subgraph *g)
 
 double shortest_distance_between_two_vertices(Subgraph *g)
 {
-    return std::min_element(g->get_edges().begin(), g->get_edges().end())->w; // The shortest distance is the weight of the shortest edge
+    double min_edge = std::numeric_limits<weight>::max();
+    for (Graph::edge e : g->get_edges())
+    {
+        if (e.w < min_edge)
+            min_edge = e.w;
+    }
+    return min_edge;
 }
