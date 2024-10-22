@@ -5,6 +5,7 @@
 #include <map>
 #include <cstring>
 #include <cstdio>
+#include <cstdlib>
 #include "Graph.hpp"
 
 class vertex_not_in_subgraph_exception : std::exception

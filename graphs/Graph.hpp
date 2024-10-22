@@ -3,6 +3,7 @@
 #include <list>
 #include <limits>
 #include <utility>
+#include <vector>
 
 using vertex = size_t;
 using weight = double;

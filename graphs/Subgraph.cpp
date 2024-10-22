@@ -69,11 +69,15 @@ std::list<std::pair<vertex, weight>> Subgraph::get_neighbors(const vertex v) con
 
 weight Subgraph::set_edge(const vertex src, const vertex dst, const weight u)
 {
+    (void)src;
+    (void)dst;
+    (void)u;
     throw std::runtime_error("set_edge is not supported in Subgraph");
 }
 
 weight Subgraph::set_edge(const Graph::edge e)
 {
+    (void)e;
     throw std::runtime_error("set_edge is not supported in Subgraph");
 }
 
