@@ -24,6 +24,8 @@
 #define MAX_USERS 5
 #define MAX_SEGMENT_SIZE 65535
 
+#define DEBUG
+
 using std::cin, std::cout, std::set, std::string;
 
 Graph *g = nullptr;
@@ -73,7 +75,16 @@ bool handle_user_input(int fd, string input)
                 }
                 return false;
             }
+            if(!is_connected(g))
+            {
+                if (send_message(fd, "The graph is not connected, therefore has no MST\n"))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
+                return false;
+            }
         }
+        
         string algo_name;
         std::getline(is, algo_name);
         std::stringstream buffer;
@@ -81,6 +92,13 @@ bool handle_user_input(int fd, string input)
             std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
             mst_strat_t *algo = mst_strategy(algo_name);
             Subgraph MST_Graph = algo(g);
+            #ifdef DEBUG
+            std::cout << "MST Graph:" << std::endl;
+            for (auto &[u, v, w] : MST_Graph.get_edges())
+            {
+                std::cout << "(" << u << ", " << v << ") With weight: " << w << '\n';
+            }
+            #endif
             double total_MST_weight = total_weight(&MST_Graph);
             double average_distance = average_distance_between_two_vertices(&MST_Graph);
             double shortest_distance = shortest_distance_between_two_vertices(&MST_Graph);
@@ -125,6 +143,10 @@ bool handle_user_input(int fd, string input)
             std::vector<Graph::edge> edges;
             for (size_t i = 0; i < m; ++i)
             {
+                if(send_message(fd, "Enter edge and weight: "))
+                {
+                    throw std::runtime_error("Error sending a message to the client");
+                }
                 vertex src, dst;
                 weight w;
                 string received_edge = receive_message(fd);
@@ -132,7 +154,7 @@ bool handle_user_input(int fd, string input)
                 cout << "Received edge: " << received_edge << std::endl;
                 if (edge_stream >> src >> dst >> w)
                 {
-                    cout << "Parsed edge: " << src << " " << dst << std::endl;
+                    cout << "Parsed edge: " << src << " <-> " << dst << " With weight: "<< w <<  std::endl;
                     edges.push_back(Graph::edge(src, dst, w));
                 }
                 else
@@ -245,7 +267,7 @@ bool handle_user_input(int fd, string input)
     }
     else
     {
-        if (send_message(fd, "Unknown command\n"))
+        if (send_message(fd, "Unknown command: " + command + "\n"))
         {
             throw std::runtime_error("Error sending a message to the client");
         }
