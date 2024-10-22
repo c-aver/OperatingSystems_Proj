@@ -1,0 +1,560 @@
+--------------------------------------------------------------------------------
+Profile data file './callgrind.txt' (creator: callgrind-3.22.0)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 351926676
+Trigger: Program termination
+Profiled target:  ./main (PID 120094, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                     
+--------------------------------------------------------------------------------
+1,296,490,966 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                    file:function
+--------------------------------------------------------------------------------
+407,365,982 (31.42%)  ./socket/../sysdeps/unix/sysv/linux/accept.c:accept [/usr/lib/x86_64-linux-gnu/libc.so.6]
+309,036,402 (23.84%)  main.cpp:main [/home/uriel/Desktop/VSCode/OperatingSystems_Proj/main]
+224,810,112 (17.34%)  ./nptl/./nptl/cancellation.c:__pthread_enable_asynccancel [/usr/lib/x86_64-linux-gnu/libc.so.6]
+210,759,480 (16.26%)  ./nptl/./nptl/cancellation.c:__pthread_disable_asynccancel [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 56,188,408 ( 4.33%)  ./csu/./csu/errno-loc.c:__errno_location [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 28,101,264 ( 2.17%)  ./nptl/../nptl/descr.h:__pthread_enable_asynccancel
+ 28,094,206 ( 2.17%)  ???:0x000000000010c880 [???]
+ 28,094,204 ( 2.17%)  ???:0x000000000010c7c0 [???]
+
+--------------------------------------------------------------------------------
+-- Auto-annotated source: main.cpp
+--------------------------------------------------------------------------------
+Ir                   
+
+-- line 23 ----------------------------------------
+          .           #define PORT 9034
+          .           #define MAX_USERS 5
+          .           #define MAX_SEGMENT_SIZE 65535
+          .           
+          .           // #define DEBUG
+          .           
+          .           using std::cin, std::cout, std::set, std::string;
+          .           
+          7 ( 0.00%)  std::unique_ptr<Graph> g = nullptr;
+         78 ( 0.00%)  => ???:0x000000000010cb00 (1x)
+         11 ( 0.00%)  LeaderFollower lf;
+     35,546 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/pattern_library/leader_follower.cpp:LeaderFollower::LeaderFollower(unsigned long) (1x)
+         78 ( 0.00%)  => ???:0x000000000010cb00 (1x)
+          .           std::shared_mutex graph_mutex;
+          .           
+          .           volatile bool running = true;
+          .           
+          .           /**
+          .            * @brief Receive a message from the client
+          .            * @return The received message
+          .            * @throw Throws runtime_error if an error occurred
+          .            */
+          .           string receive_message(int fd)
+        532 ( 0.00%)  {
+          .               char buffer[MAX_SEGMENT_SIZE];
+         49 ( 0.00%)      ssize_t bytes_read = read(fd, buffer, MAX_SEGMENT_SIZE);
+        413 ( 0.00%)  => ???:0x000000000010cd00 (7x)
+         14 ( 0.00%)      if (bytes_read < 0)
+          .               {
+          .                   throw std::runtime_error("Something went wrong when trying to read from the socket");
+          .               }
+         14 ( 0.00%)      if (bytes_read == 0)
+          .               {
+          .                   throw std::runtime_error("Connection closed by the client");
+          .               }
+         42 ( 0.00%)      buffer[bytes_read] = '\0'; // Null-terminate the buffer if it's a string
+         49 ( 0.00%)      return buffer;
+      1,392 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&) (7x)
+         63 ( 0.00%)  }
+          .           
+          .           bool send_message(int fd, string message)
+         56 ( 0.00%)  {
+        112 ( 0.00%)      return write(fd, message.c_str(), message.length() + 1) < 0;
+        472 ( 0.00%)  => ???:0x000000000010c890 (8x)
+         40 ( 0.00%)  => ???:0x000000000010c8f0 (8x)
+         40 ( 0.00%)  => ???:0x000000000010cd60 (8x)
+         24 ( 0.00%)  }
+          .           
+          .           bool handle_user_input(int fd, string input)
+         55 ( 0.00%)  {
+         30 ( 0.00%)      std::istringstream is(input);
+      4,634 ( 0.00%)  => ???:0x000000000010cde0 (5x)
+         15 ( 0.00%)      string command;
+         40 ( 0.00%)  => ???:0x000000000010ccd0 (5x)
+         30 ( 0.00%)      std::getline(is, command, ' ');
+      3,611 ( 0.00%)  => ???:0x000000000010cea0 (5x)
+         35 ( 0.00%)      if (command == "MST")
+        453 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) (5x)
+          .               {
+          .                   {
+         10 ( 0.00%)              std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+        247 ( 0.00%)  => /usr/include/c++/13/shared_mutex:std::shared_lock<std::shared_mutex>::shared_lock(std::shared_mutex&) (2x)
+         12 ( 0.00%)              if (!g)
+        140 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::unique_ptr<Graph, std::default_delete<Graph> >::operator bool() const (2x)
+          .                       {
+          .                           if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+          .                           {
+          .                               throw std::runtime_error("Error sending a message to the client");
+          .                           }
+          .                           return false;
+          .                       }
+         16 ( 0.00%)              if (!is_connected(g.get()))
+     24,262 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/Utilities.cpp:is_connected(Graph*) (2x)
+        116 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::unique_ptr<Graph, std::default_delete<Graph> >::get() const (2x)
+          .                       {
+          .                           if (send_message(fd, "The graph is not connected, therefore has no MST\n"))
+          .                           {
+          .                               throw std::runtime_error("Error sending a message to the client");
+          .                           }
+          .                           return false;
+          .                       }
+         14 ( 0.00%)          }
+        248 ( 0.00%)  => /usr/include/c++/13/shared_mutex:std::shared_lock<std::shared_mutex>::~shared_lock() (2x)
+          .           
+          6 ( 0.00%)          string algo_name;
+         16 ( 0.00%)  => ???:0x000000000010ccd0 (2x)
+         10 ( 0.00%)          std::getline(is, algo_name);
+        524 ( 0.00%)  => ???:0x000000000010c820 (2x)
+          6 ( 0.00%)          std::stringstream buffer;
+      1,650 ( 0.00%)  => ???:0x000000000010ca40 (2x)
+          .                   {
+         10 ( 0.00%)              std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+        234 ( 0.00%)  => /usr/include/c++/13/shared_mutex:std::shared_lock<std::shared_mutex>::shared_lock(std::shared_mutex&) (2x)
+         24 ( 0.00%)              mst_strat_t *algo = mst_strategy(algo_name);
+      1,925 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/MSTFactory.cpp:mst_strategy(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (2x)
+         16 ( 0.00%)  => ???:0x000000000010c9f0 (2x)
+        136 ( 0.00%)  => ???:0x000000000010c900 (2x)
+          4 ( 0.00%)              if (algo == nullptr)
+          .                       {
+          .                           send_message(fd, "Unknown MST algorithm");
+          .                           return false;
+          .                       }
+         18 ( 0.00%)              Subgraph MST_Graph = algo(g.get());
+     34,032 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/Prim.cpp:prim(Graph*) (1x)
+     27,786 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/Kruskal.cpp:kruskal(Graph*) (1x)
+        116 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::unique_ptr<Graph, std::default_delete<Graph> >::get() const (2x)
+          .           #ifdef DEBUG
+          .                       std::cout << "MST Graph:" << std::endl;
+          .                       for (auto &[u, v, w] : MST_Graph.get_edges())
+          .                       {
+          .                           std::cout << "(" << u << ", " << v << ") With weight: " << w << '\n';
+          .                       }
+          .           #endif
+         10 ( 0.00%)              double total_MST_weight = total_weight(&MST_Graph);
+     29,420 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/Utilities.cpp:total_weight(Subgraph*) (2x)
+         10 ( 0.00%)              double average_distance = average_distance_between_two_vertices(&MST_Graph);
+     76,062 ( 0.01%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/Utilities.cpp:average_distance_between_two_vertices(Subgraph*) (2x)
+         10 ( 0.00%)              double shortest_distance = shortest_distance_between_two_vertices(&MST_Graph);
+     28,756 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/Utilities.cpp:shortest_distance_between_two_vertices(Subgraph*) (2x)
+         10 ( 0.00%)              double longest_distance = longest_distance_between_two_vertices(&MST_Graph);
+     19,200 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/Utilities.cpp:longest_distance_between_two_vertices(Subgraph*) (2x)
+          .           
+         12 ( 0.00%)              buffer << "The MST is: \n";
+      1,568 ( 0.00%)  => ???:0x000000000010cb50 (2x)
+        102 ( 0.00%)              for (auto &[u, v, w] : MST_Graph.get_edges())
+     27,650 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/graphs/Subgraph.cpp:Subgraph::get_edges() const (2x)
+        204 ( 0.00%)  => /usr/include/c++/13/bits/stl_iterator.h:bool __gnu_cxx::operator!=<Graph::edge*, std::vector<Graph::edge, std::allocator<Graph::edge> > >(__gnu_cxx::__normal_iterator<Graph::edge*, std::vector<Graph::edge, std::allocator<Graph::edge> > > const&, __gnu_cxx::__normal_iterator<Graph::edge*, std::vector<Graph::edge, std::allocator<Graph::edge> > > const&) (6x)
+         64 ( 0.00%)  => /usr/include/c++/13/bits/stl_vector.h:std::vector<Graph::edge, std::allocator<Graph::edge> >::end() (2x)
+         62 ( 0.00%)  => /usr/include/c++/13/bits/stl_vector.h:std::vector<Graph::edge, std::allocator<Graph::edge> >::begin() (2x)
+         48 ( 0.00%)  => /usr/include/c++/13/bits/stl_iterator.h:__gnu_cxx::__normal_iterator<Graph::edge*, std::vector<Graph::edge, std::allocator<Graph::edge> > >::operator++() (4x)
+         32 ( 0.00%)  => /usr/include/c++/13/bits/stl_iterator.h:__gnu_cxx::__normal_iterator<Graph::edge*, std::vector<Graph::edge, std::allocator<Graph::edge> > >::operator*() const (4x)
+          .                       {
+        148 ( 0.00%)                  buffer << "(" << u << ", " << v << ") With weight: " << w << '\n';
+      7,358 ( 0.00%)  => ???:0x000000000010cec0 (4x)
+      7,270 ( 0.00%)  => ???:0x000000000010cb50 (12x)
+      2,396 ( 0.00%)  => ???:0x000000000010c830 (8x)
+        344 ( 0.00%)  => ???:0x000000000010cc20 (4x)
+          6 ( 0.00%)              }
+        500 ( 0.00%)  => /usr/include/c++/13/bits/stl_vector.h:std::vector<Graph::edge, std::allocator<Graph::edge> >::~vector() (2x)
+          .           
+         28 ( 0.00%)              buffer << "The total weight of the MST is: " << total_MST_weight << '\n';
+      3,678 ( 0.00%)  => ???:0x000000000010cec0 (2x)
+        370 ( 0.00%)  => ???:0x000000000010cb50 (2x)
+        172 ( 0.00%)  => ???:0x000000000010cc20 (2x)
+         28 ( 0.00%)              buffer << "The average distance between two vertices in the MST is: " << average_distance << '\n';
+      3,986 ( 0.00%)  => ???:0x000000000010cec0 (2x)
+        378 ( 0.00%)  => ???:0x000000000010cb50 (2x)
+        172 ( 0.00%)  => ???:0x000000000010cc20 (2x)
+         28 ( 0.00%)              buffer << "The shortest distance between two vertices in the MST is: " << shortest_distance << '\n';
+      3,680 ( 0.00%)  => ???:0x000000000010cec0 (2x)
+        378 ( 0.00%)  => ???:0x000000000010cb50 (2x)
+        172 ( 0.00%)  => ???:0x000000000010cc20 (2x)
+         28 ( 0.00%)              buffer << "The longest distance between two vertices in the MST is: " << longest_distance << '\n';
+      3,678 ( 0.00%)  => ???:0x000000000010cec0 (2x)
+        378 ( 0.00%)  => ???:0x000000000010cb50 (2x)
+        172 ( 0.00%)  => ???:0x000000000010cc20 (2x)
+         20 ( 0.00%)          }
+      4,128 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/algorithms/../graphs/Subgraph.hpp:Subgraph::~Subgraph() (2x)
+        248 ( 0.00%)  => /usr/include/c++/13/shared_mutex:std::shared_lock<std::shared_mutex>::~shared_lock() (2x)
+         32 ( 0.00%)          if (send_message(fd, buffer.str()))
+      1,922 ( 0.00%)  => ???:0x000000000010cb40 (2x)
+        216 ( 0.00%)  => ???:0x000000000010c9f0 (2x)
+        186 ( 0.00%)  => main.cpp:send_message(int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (2x)
+          .                   {
+          .                       throw std::runtime_error("Error sending a message to the client");
+          .                   }
+          .           
+          2 ( 0.00%)          return false;
+         14 ( 0.00%)      }
+        460 ( 0.00%)  => ???:0x000000000010ca70 (2x)
+         16 ( 0.00%)  => ???:0x000000000010c9f0 (2x)
+         21 ( 0.00%)      else if (command == "Newgraph")
+        257 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) (3x)
+          .               {
+          6 ( 0.00%)          std::string param1, param2;
+         16 ( 0.00%)  => ???:0x000000000010ccd0 (2x)
+          6 ( 0.00%)          std::getline(is, param1, ',');
+        194 ( 0.00%)  => ???:0x000000000010cea0 (1x)
+          5 ( 0.00%)          std::getline(is, param2);
+      2,362 ( 0.00%)  => ???:0x000000000010c820 (1x)
+         13 ( 0.00%)          if (param1.length() == 0 || param2.length() == 0)
+         10 ( 0.00%)  => ???:0x000000000010cd60 (2x)
+          .                   {
+          .                       if (send_message(fd, "Not enough parameters detected, command ignored\n"))
+          .                       {
+          .                           throw std::runtime_error("Error sending a message to the client");
+          .                       }
+          .                   }
+         16 ( 0.00%)          size_t n = strtoull(param1.c_str(), nullptr, 10), m = strtoull(param2.c_str(), nullptr, 10);
+        226 ( 0.00%)  => ???:0x000000000010ccc0 (2x)
+         10 ( 0.00%)  => ???:0x000000000010c8f0 (2x)
+          .                   {
+          5 ( 0.00%)              std::unique_lock<std::shared_mutex> graph_lock(graph_mutex);
+        174 ( 0.00%)  => /usr/include/c++/13/bits/unique_lock.h:std::unique_lock<std::shared_mutex>::unique_lock(std::shared_mutex&) (1x)
+          .           
+          3 ( 0.00%)              std::vector<Graph::edge> edges;
+         52 ( 0.00%)  => /usr/include/c++/13/bits/stl_vector.h:std::vector<Graph::edge, std::allocator<Graph::edge> >::vector() (1x)
+          .                       try
+          .                       {
+         13 ( 0.00%)                  for (size_t i = 0; i < m; ++i)
+          .                           {
+          .                               vertex src, dst;
+          .                               weight w;
+         10 ( 0.00%)                      string received_edge = receive_message(fd);
+        762 ( 0.00%)  => main.cpp:receive_message[abi:cxx11](int) (2x)
+         12 ( 0.00%)                      std::istringstream edge_stream(received_edge);
+      1,420 ( 0.00%)  => ???:0x000000000010cde0 (2x)
+         28 ( 0.00%)                      cout << "Received edge: " << received_edge << std::endl;
+        696 ( 0.00%)  => ???:0x000000000010cb50 (2x)
+      1,038 ( 0.00%)  => ???:0x000000000010cb90 (2x)
+        914 ( 0.00%)  => ???:0x000000000010cb10 (2x)
+         46 ( 0.00%)                      if (edge_stream >> src >> dst >> w)
+     11,986 ( 0.00%)  => ???:0x000000000010cac0 (2x)
+      3,743 ( 0.00%)  => ???:0x000000000010ccf0 (4x)
+         12 ( 0.00%)  => ???:0x000000000010cc80 (2x)
+          .                               {
+         68 ( 0.00%)                          cout << "Parsed edge: " << src << " " << dst << " " << w << std::endl;
+      7,481 ( 0.00%)  => ???:0x000000000010cec0 (2x)
+      1,800 ( 0.00%)  => ???:0x000000000010cb50 (6x)
+      3,536 ( 0.00%)  => ???:0x000000000010c830 (4x)
+      1,038 ( 0.00%)  => ???:0x000000000010cb90 (2x)
+         28 ( 0.00%)                          edges.push_back(Graph::edge(src, dst, w));
+      2,661 ( 0.00%)  => /usr/include/c++/13/bits/stl_vector.h:std::vector<Graph::edge, std::allocator<Graph::edge> >::push_back(Graph::edge&&) (2x)
+         38 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/graphs/Graph.hpp:Graph::edge::edge(unsigned long, unsigned long, double) (2x)
+          .                               }
+          .                               else
+          .                               {
+          .                                   cout << "Failed to parse edge: " << received_edge << std::endl;
+          .                               }
+         12 ( 0.00%)                  }
+      2,667 ( 0.00%)  => ???:0x000000000010c940 (2x)
+         16 ( 0.00%)  => ???:0x000000000010c9f0 (2x)
+          .                       }
+          .                       catch (std::runtime_error &e)
+          .                       {
+          .                           std::cout << "Client closed while talking" << std::endl;
+          .                       }
+         14 ( 0.00%)              g = std::make_unique<AdjacencyGraph>(n, edges);
+      8,348 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::__detail::_MakeUniq<AdjacencyGraph>::__single_object std::make_unique<AdjacencyGraph, unsigned long&, std::vector<Graph::edge, std::allocator<Graph::edge> >&>(unsigned long&, std::vector<Graph::edge, std::allocator<Graph::edge> >&) (1x)
+        429 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::enable_if<std::__and_<std::__and_<std::is_convertible<std::unique_ptr<AdjacencyGraph, std::default_delete<AdjacencyGraph> >::pointer, Graph*>, std::__not_<std::is_array<AdjacencyGraph> > >, std::is_assignable<std::default_delete<Graph>&, std::default_delete<AdjacencyGraph>&&> >::value, std::unique_ptr<Graph, std::default_delete<Graph> >&>::type std::unique_ptr<Graph, std::default_delete<Graph> >::operator=<AdjacencyGraph, std::default_delete<AdjacencyGraph> >(std::unique_ptr<AdjacencyGraph, std::default_delete<AdjacencyGraph> >&&) (1x)
+         67 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::unique_ptr<AdjacencyGraph, std::default_delete<AdjacencyGraph> >::~unique_ptr() (1x)
+          6 ( 0.00%)          }
+        250 ( 0.00%)  => /usr/include/c++/13/bits/stl_vector.h:std::vector<Graph::edge, std::allocator<Graph::edge> >::~vector() (1x)
+        137 ( 0.00%)  => /usr/include/c++/13/bits/unique_lock.h:std::unique_lock<std::shared_mutex>::~unique_lock() (1x)
+          1 ( 0.00%)          return false;
+          7 ( 0.00%)      }
+         16 ( 0.00%)  => ???:0x000000000010c9f0 (2x)
+         28 ( 0.00%)      else if (command == "Newedge" || command == "Updateedge")
+        257 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) (3x)
+          .               {
+          .                   {
+          5 ( 0.00%)              std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+        117 ( 0.00%)  => /usr/include/c++/13/shared_mutex:std::shared_lock<std::shared_mutex>::shared_lock(std::shared_mutex&) (1x)
+          .           
+          6 ( 0.00%)              if (!g)
+         70 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::unique_ptr<Graph, std::default_delete<Graph> >::operator bool() const (1x)
+          .                       {
+          .                           if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+          .                           {
+          .                               throw std::runtime_error("Error sending a message to the client");
+          .                           }
+          .                           return false;
+          .                       }
+          7 ( 0.00%)          }
+        124 ( 0.00%)  => /usr/include/c++/13/shared_mutex:std::shared_lock<std::shared_mutex>::~shared_lock() (1x)
+          9 ( 0.00%)          std::string param1, param2, edge_weight;
+         24 ( 0.00%)  => ???:0x000000000010ccd0 (3x)
+          6 ( 0.00%)          std::getline(is, param1, ',');
+        194 ( 0.00%)  => ???:0x000000000010cea0 (1x)
+          6 ( 0.00%)          std::getline(is, param2, ',');
+        194 ( 0.00%)  => ???:0x000000000010cea0 (1x)
+          5 ( 0.00%)          std::getline(is, edge_weight);
+        185 ( 0.00%)  => ???:0x000000000010c820 (1x)
+         18 ( 0.00%)          if (param1.length() == 0 || param2.length() == 0 || edge_weight.length() == 0)
+         15 ( 0.00%)  => ???:0x000000000010cd60 (3x)
+          .                   {
+          .                       if (send_message(fd, "Not enough parameters detected, command ignored\n"))
+          .                       {
+          .                           throw std::runtime_error("Error sending a message to the client");
+          .                       }
+          .                   }
+         16 ( 0.00%)          vertex src = strtoull(param1.c_str(), nullptr, 10), dst = strtoull(param2.c_str(), nullptr, 10);
+        230 ( 0.00%)  => ???:0x000000000010ccc0 (2x)
+         10 ( 0.00%)  => ???:0x000000000010c8f0 (2x)
+          8 ( 0.00%)          weight w = strtod(edge_weight.c_str(), nullptr);
+        404 ( 0.00%)  => ???:0x000000000010ca90 (1x)
+          5 ( 0.00%)  => ???:0x000000000010c8f0 (1x)
+          .                   {
+          5 ( 0.00%)              std::unique_lock<std::shared_mutex> graph_lock(graph_mutex);
+        174 ( 0.00%)  => /usr/include/c++/13/bits/unique_lock.h:std::unique_lock<std::shared_mutex>::unique_lock(std::shared_mutex&) (1x)
+          .           
+         26 ( 0.00%)              if (!(g)->set_edge(src, dst, w))
+        500 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/graphs/AdjacencyGraph.cpp:AdjacencyGraph::set_edge(unsigned long, unsigned long, double) (1x)
+         68 ( 0.00%)  => /usr/include/c++/13/bits/unique_ptr.h:std::unique_ptr<Graph, std::default_delete<Graph> >::operator->() const (1x)
+          .                       {
+          .                           if (send_message(fd, "Edge already exists\n"))
+          .                           {
+          2 ( 0.00%)                      throw std::runtime_error("Error sending a message to the client");
+          .                           }
+          .                       }
+          .                       else
+          .                       {
+         17 ( 0.00%)                  if (send_message(fd, "Edge was created successfuly\n"))
+        108 ( 0.00%)  => ???:0x000000000010c9f0 (1x)
+        299 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&) (1x)
+         93 ( 0.00%)  => main.cpp:send_message(int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (1x)
+          .                           {
+          .                               throw std::runtime_error("Error sending a message to the client");
+          .                           }
+          .                       }
+          3 ( 0.00%)          }
+        137 ( 0.00%)  => /usr/include/c++/13/bits/unique_lock.h:std::unique_lock<std::shared_mutex>::~unique_lock() (1x)
+          1 ( 0.00%)          return false;
+         10 ( 0.00%)      }
+         24 ( 0.00%)  => ???:0x000000000010c9f0 (3x)
+          7 ( 0.00%)      else if (command == "Removeedge")
+         61 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) (1x)
+          .               {
+          .                   {
+          .                       std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
+          .           
+          .                       if (!g)
+          .                       {
+          .                           if (send_message(fd, "Please create a graph using Newgraph <n>,<m> first\n"))
+          .                           {
+-- line 232 ----------------------------------------
+-- line 261 ----------------------------------------
+          .                           if (send_message(fd, "Edge was removed successfuly\n"))
+          .                           {
+          .                               throw std::runtime_error("Error sending a message to the client");
+          .                           }
+          .                       }
+          .                   }
+          .                   return false;
+          .               }
+          7 ( 0.00%)      else if (command == "Exit")
+        137 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) (1x)
+          .               {
+          .                   std::cout << "Connection closed by the client" << std::endl;
+          .                   close(fd);
+          .                   lf.remove_fd(fd);
+          .                   return true;
+          .               }
+          7 ( 0.00%)      else if (command == "Kill") // Kill the server
+        135 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*) (1x)
+          .               {
+          3 ( 0.00%)          close(fd);
+         55 ( 0.00%)  => ???:0x000000000010cef0 (1x)
+          5 ( 0.00%)          lf.remove_fd(fd);
+      1,211 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/pattern_library/leader_follower.cpp:LeaderFollower::remove_fd(int) (1x)
+          1 ( 0.00%)          running = false;
+          2 ( 0.00%)          return true;
+          .               }
+          .               else
+          .               {
+          .                   if (send_message(fd, "Unknown command: " + command + "\n"))
+          .                   {
+          .                       close(fd);
+          .                       lf.remove_fd(fd);
+          .                       return true;
+          .                   }
+          .                   return false;
+          .               }
+         75 ( 0.00%)  }
+        620 ( 0.00%)  => ???:0x000000000010c940 (5x)
+         40 ( 0.00%)  => ???:0x000000000010c9f0 (5x)
+          .           
+          .           void message_handler(int fd)
+         45 ( 0.00%)  {
+         15 ( 0.00%)      string input;
+         40 ( 0.00%)  => ???:0x000000000010ccd0 (5x)
+          .               try
+          .               {
+         65 ( 0.00%)          input = receive_message(fd);
+      1,897 ( 0.00%)  => main.cpp:receive_message[abi:cxx11](int) (5x)
+        267 ( 0.00%)  => ???:0x000000000010cc60 (5x)
+         40 ( 0.00%)  => ???:0x000000000010c9f0 (5x)
+          .               }
+          .               catch (const std::runtime_error &e)
+          .               {
+          .                   cout << e.what() << std::endl;
+          .                   close(fd);
+          .                   return;
+          .               }
+         15 ( 0.00%)      input.pop_back(); // Remove the newline character
+      1,145 ( 0.00%)  => ???:0x000000000010cc50 (5x)
+         80 ( 0.00%)      if (handle_user_input(fd, input))
+    384,758 ( 0.03%)  => main.cpp:handle_user_input(int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (5x)
+      1,532 ( 0.00%)  => ???:0x000000000010c900 (5x)
+         40 ( 0.00%)  => ???:0x000000000010c9f0 (5x)
+          .               {
+         10 ( 0.00%)          return; // The user requested to close the connection, so we don't need to send a message
+          .               }
+         68 ( 0.00%)      if (send_message(fd, "Enter command: "))
+        792 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&) (4x)
+        372 ( 0.00%)  => main.cpp:send_message(int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (4x)
+         32 ( 0.00%)  => ???:0x000000000010c9f0 (4x)
+          .               {
+          .                   std::cerr << ("Error sending a message to the client\n");
+          .                   close(fd);
+          .                   return;
+          .               }
+         54 ( 0.00%)  }
+         40 ( 0.00%)  => ???:0x000000000010c9f0 (5x)
+          .           
+          .           int main()
+          9 ( 0.00%)  {
+          1 ( 0.00%)      int server_fd = -1;
+          1 ( 0.00%)      int new_socket = -1;
+          .               struct sockaddr_in address;
+          1 ( 0.00%)      int opt = 1;
+          1 ( 0.00%)      int addrlen = sizeof(address);
+          .           
+          9 ( 0.00%)      std::cout << "Waiting for incoming connections..." << std::endl;
+      6,079 ( 0.00%)  => ???:0x000000000010cb50 (1x)
+      5,752 ( 0.00%)  => ???:0x000000000010cb90 (1x)
+          .           
+          .               // Creating socket file descriptor
+          9 ( 0.00%)      if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
+          8 ( 0.00%)  => ???:0x000000000010c840 (1x)
+          .               {
+          .                   perror("socket failed");
+          .                   exit(EXIT_FAILURE);
+          .               }
+          .           
+          .               // Forcefully attaching socket to the port 9034
+         12 ( 0.00%)      if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
+          9 ( 0.00%)  => ???:0x000000000010ce60 (1x)
+          .               {
+          .                   perror("setsockopt");
+          .                   close(server_fd);
+          .                   exit(EXIT_FAILURE);
+          .               }
+          .           
+          1 ( 0.00%)      address.sin_family = AF_INET;
+          1 ( 0.00%)      address.sin_addr.s_addr = INADDR_ANY;
+          3 ( 0.00%)      address.sin_port = htons(PORT);
+          6 ( 0.00%)  => ???:0x000000000010c7d0 (1x)
+          .           
+          .               // Bind the socket to the network address and port
+          9 ( 0.00%)      if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+          8 ( 0.00%)  => ???:0x000000000010c800 (1x)
+          .               {
+          .                   perror("bind failed");
+          .                   close(server_fd);
+          .                   exit(EXIT_FAILURE);
+          .               }
+          .           
+          .               // Listen for incoming connections
+          7 ( 0.00%)      if (listen(server_fd, MAX_USERS) < 0)
+          8 ( 0.00%)  => ???:0x000000000010cbf0 (1x)
+          .               {
+          .                   perror("listen");
+          .                   close(server_fd);
+          .                   exit(EXIT_FAILURE);
+          .               }
+          .           
+          .               // Set the socket to non-blocking mode
+          9 ( 0.00%)      if (fcntl(server_fd, F_SETFL, O_NONBLOCK) < 0)
+         43 ( 0.00%)  => ???:0x000000000010c9b0 (1x)
+          .               {
+          .                   perror("fcntl(F_SETFL | O_NONBLOCK)");
+          .                   close(server_fd);
+          .                   exit(EXIT_FAILURE);
+          .               }
+         12 ( 0.00%)      std::cout << "Server is listening on port " << PORT << std::endl;
+        411 ( 0.00%)  => ???:0x000000000010cb50 (1x)
+        519 ( 0.00%)  => ???:0x000000000010cb90 (1x)
+      2,401 ( 0.00%)  => ???:0x000000000010ce30 (1x)
+          .           
+ 42,141,313 ( 3.25%)      while (running)
+          .               {
+ 14,047,103 ( 1.08%)          new_socket = -1;
+          .                   // Accept an incoming connection
+224,753,644 (17.34%)          if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0 && errno != EAGAIN)
+899,014,587 (69.34%)  => ???:0x000000000010c880 (14,047,103x)
+ 84,282,612 ( 6.50%)  => ???:0x000000000010c7c0 (14,047,102x)
+          .                   {
+          .                       perror("accept");
+          .                       close(server_fd);
+          .                       exit(EXIT_FAILURE);
+          .                   }
+          .           
+ 28,094,206 ( 2.17%)          if (new_socket > 0)
+          .                   {
+          9 ( 0.00%)              std::cout << "New connection accepted" << std::endl;
+        386 ( 0.00%)  => ???:0x000000000010cb50 (1x)
+        519 ( 0.00%)  => ???:0x000000000010cb90 (1x)
+         16 ( 0.00%)              lf.add_fd(new_socket, message_handler);
+      2,869 ( 0.00%)  => /home/uriel/Desktop/VSCode/OperatingSystems_Proj/pattern_library/leader_follower.cpp:LeaderFollower::add_fd(int, std::function<void (int)>) (1x)
+        132 ( 0.00%)  => /usr/include/c++/13/bits/std_function.h:std::function<void (int)>::function<void (&)(int), void>(void (&)(int)) (1x)
+        102 ( 0.00%)  => /usr/include/c++/13/bits/std_function.h:std::function<void (int)>::~function() (1x)
+         17 ( 0.00%)              if (send_message(new_socket, "Enter command: "))
+      1,217 ( 0.00%)  => /usr/include/c++/13/bits/basic_string.h:std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::basic_string<std::allocator<char> >(char const*, std::allocator<char> const&) (1x)
+         93 ( 0.00%)  => main.cpp:send_message(int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >) (1x)
+          8 ( 0.00%)  => ???:0x000000000010c9f0 (1x)
+          .                       {
+          .                           close(new_socket);
+          .                           close(server_fd);
+          .                           throw std::runtime_error("Error sending a message to the client");
+          .                       }
+          .                   }
+          .               }
+          1 ( 0.00%)      return 0;
+         20 ( 0.00%)  }
+     35,726 ( 0.00%)  => main.cpp:__static_initialization_and_destruction_0() (1x)
+
+--------------------------------------------------------------------------------
+The following files chosen for auto-annotation could not be found:
+--------------------------------------------------------------------------------
+  ./csu/./csu/errno-loc.c
+  ./nptl/../nptl/descr.h
+  ./nptl/./nptl/cancellation.c
+  ./socket/../sysdeps/unix/sysv/linux/accept.c
+
+--------------------------------------------------------------------------------
+Ir                   
+--------------------------------------------------------------------------------
+309,039,127 (23.84%)  events annotated
+
