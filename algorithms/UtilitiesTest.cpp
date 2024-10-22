@@ -16,6 +16,13 @@ TEST_CASE("Test - total_weight")
     edges.push_back(e3);
     AdjacencyGraph g(vertices, edges);
     Subgraph mst(g);
-
-    CHECK(total_weight(&mst) == 3);
+    for(vertex v=0;v<vertices;v++)
+    {
+        mst.add_vertex(v);
+    }
+    mst.add_edge(0, 1);
+    mst.add_edge(0, 2);
+    mst.add_edge(2, 3);
+    double x = total_weight(&mst);
+    CHECK(x == 3);
 }
