@@ -6,16 +6,15 @@ using std::list, std::vector;
 
 /*
  * This function performs a Depth First Search (DFS) on the graph to check connactivity.
- * This function is used to check if the graph is strongly connected (1 SCC).
  */
 void DFS(Graph *g, vertex current, vector<bool> &visited)
 {
-    visited[current] = true;
+    visited[current] = true; // Mark the current node as visited
 
     // Iterate over all of the current's neighbours
     for (std::pair neighbor : g->get_neighbors(current))
     {
-        if (!visited[neighbor.first])
+        if (!visited[neighbor.first]) // If the neighbour wasn't visited yet, visit it
         {
             DFS(g, neighbor.first, visited);
         }
@@ -35,11 +34,11 @@ bool is_connected(Graph *g)
 
     DFS(g, 0, visited);
 
-    if (std::find(visited.begin(), visited.end(), false) != visited.end()) // If there is a vertex which wasn't visited
+    if (std::find(visited.begin(), visited.end(), false) != visited.end()) // If there is a vertex which wasn't visited by the DFS, the graph is not connected
     {
         return false;
     }
-    return true; // The graph is connected if all nodes are visited
+    return true;    // The graph is connected if all nodes were visited
 }
 
 double total_weight(Subgraph *g)
@@ -47,7 +46,7 @@ double total_weight(Subgraph *g)
     double result = 0;
     for (Graph::edge e : g->get_edges())
     {
-        result += e.w;
+        result += e.w;          
     }
     return result;
 }
@@ -57,11 +56,11 @@ std::pair<double, double> longest_and_farthest(Subgraph *g, vertex v, vertex par
     double farthest = 0.0;
     double second_farthest = 0.0;
     double child_longest = 0.0;
-    for (auto &[u, w] : g->get_neighbors(v))
+    for (auto &[u, w] : g->get_neighbors(v))    // Iterate over all of the neighbours of the current vertex
     {
         if (u == parent)
             continue;
-        auto [u_longest, u_farthest] = longest_and_farthest(g, u, v);
+        auto [u_longest, u_farthest] = longest_and_farthest(g, u, v);   // Recursively find the longest path from the current vertex to its descendants
         u_farthest += w;
         if (u_longest > child_longest)
             child_longest = u_longest;
@@ -115,12 +114,15 @@ double average_distance_between_two_vertices(Subgraph *g)
         size_t m = std::min(descendents[u], descendents[v]); // Get the minimum number of descendents that can go through this edge
         total_weight += m * (g->get_vertex_count() - m) * w; // The amount of paths that go through this edge is m * (n - m)
     }
-    return total_weight / ((g->get_vertex_count() * (g->get_vertex_count() - 1)/2) +g->get_vertex_count()) ; // The average distance is the total weight divided by the total number of paths
+    return total_weight / ((g->get_vertex_count() * (g->get_vertex_count() - 1) / 2) + g->get_vertex_count()); // The average distance is the total weight divided by the total number of paths
 }
 
 double shortest_distance_between_two_vertices(Subgraph *g)
 {
-    double min_edge = std::numeric_limits<weight>::max();
+    if(g->get_vertex_count() <= 1)
+        return 0;
+    
+    double min_edge = std::numeric_limits<weight>::max(); 
     for (Graph::edge e : g->get_edges())
     {
         if (e.w < min_edge)

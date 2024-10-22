@@ -8,6 +8,9 @@
 using vertex = size_t;
 using weight = double;
 
+/**
+ * @brief An abstract class representing a graph
+ */
 class Graph
 {
 public:
@@ -18,7 +21,7 @@ public:
         weight w;
         edge(vertex a, vertex b, weight w) : a(a), b(b), w(w) {}
     };
-    static constexpr weight no_edge = std::numeric_limits<weight>::max();
+    static constexpr weight no_edge = std::numeric_limits<weight>::max();   // No edge between two vertices is set to have this weight value
     virtual ~Graph() = default;
     virtual size_t get_vertex_count() const = 0;
     virtual weight get_weight(const vertex src, const vertex dst) const = 0;
@@ -34,7 +37,7 @@ inline bool operator<(const Graph::edge a, const Graph::edge b)
     return a.w < b.w;
 }
 
-inline bool operator==(const Graph::edge a, const Graph::edge b)
+inline bool operator==(const Graph::edge a, const Graph::edge b) 
 {
     return a.a == b.a && b.a == b.b && a.w == b.w;
 }

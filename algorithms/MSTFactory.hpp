@@ -9,4 +9,4 @@ using mst_strat_t = Subgraph(Graph*);
 #include "Prim.hpp"
 
 
-mst_strat_t *mst_strategy(std::string algo_name); // TODO: parameters
+mst_strat_t *mst_strategy(std::string algo_name);
