@@ -52,121 +52,37 @@ double total_weight(Subgraph *g)
     return result;
 }
 
-/**
- * @brief Find the longest path in a graph between two vertices
- * Is used for the longest_distance_between_two_vertices function
- * @return The weight of the longest path from the start vertex to one of its descendants
- */
-double find_longest_path(Subgraph *g, vertex start, vertex parent)
+std::pair<double, double> longest_and_farthest(Subgraph *g, vertex v, vertex parent)
 {
-    std::list<std::pair<vertex, weight>> neighbours = g->get_neighbors(start);
-    if (neighbours.empty())
-        return 0;
-    auto max_element = *std::max_element(neighbours.begin(), neighbours.end(),
-                                         [](const std::pair<vertex, weight> &a, const std::pair<vertex, weight> &b)
-                                         { return a.second < b.second; });
-    if (max_element.second < 0)
+    double farthest = 0.0;
+    double second_farthest = 0.0;
+    double child_longest = 0.0;
+    for (auto &[u, w] : g->get_neighbors(v))
     {
-        return 0;
+        if (u == parent)
+            continue;
+        auto [u_longest, u_farthest] = longest_and_farthest(g, u, v);
+        u_farthest += w;
+        if (u_longest > child_longest)
+            child_longest = u_longest;
+        if (u_farthest > farthest)
+        {
+            second_farthest = farthest;
+            farthest = u_farthest;
+        }
+        else if (u_farthest > second_farthest)
+        {
+            second_farthest = u_farthest;
+        }
     }
 
-    double max = 0;
-    for (auto n : neighbours)
-    {
-        if (n.first == parent)
-            continue;
-        double distance = n.second + find_longest_path(g, n.first, start);
-        if (distance > max)
-            max = distance;
-    }
-    return max;
+    double longest = std::max({farthest + second_farthest, child_longest});
+    return std::make_pair(longest, farthest);
 }
 
-double longest_distance_between_two_vertices(Subgraph *g, vertex start, vertex parent)
-{
-    // We will check 4 cases:
-
-    // 1. The longest path is from the start vertex to itself (The MST is a single vertex)
-    if (start == parent || start >= g->get_vertex_count())
-        return 0;
-
-    // 2. The longest path is from the start vertex to one of its descendants.
-    double path_from_start = find_longest_path(g, start, parent);
-
-    // 3. The longest path goes through the start vertex.
-    double path_from_start_with_childs = 0;
-    std::list<std::pair<vertex, weight>> neighbours = g->get_neighbors(start);
-    if (neighbours.size() > 1)
-    {
-        neighbours.sort([](const std::pair<vertex, weight> &a, const std::pair<vertex, weight> &b)
-                        { return a.second > b.second; });
-        path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
-        neighbours.pop_front();
-        path_from_start_with_childs += neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
-    }
-    else if (neighbours.size() == 1)
-    {
-        path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
-    }
-
-    // 4. The longest path is from one of the start vertex's descendants to another descendant, but doesn't go through the start vertex.
-    double path_from_childs = 0;
-    for (auto v : g->get_neighbors(start))
-    {
-        if(v.first == parent)
-            continue;
-        double path = longest_distance_between_two_vertices(g, v.first, start);
-        if (path > path_from_childs)
-            path_from_childs = path;
-    }
-
-    return std::max({path_from_start, path_from_childs, path_from_start_with_childs, 0.0});
-}
-
-/**
- * @brief Find the longest path in a graph between two vertices
- *  There are 4 cases to consider:
- *  1. The longest path is from the start vertex to one of its descendants.
- *  2. The longest path goes through the start vertex.
- *  3. The longest path is from one of the start vertex's descendants to another descendant, but doesn't go through the start vertex.
- *  4. The longest path is only between the start vertex and itself.
- */
 double longest_distance_between_two_vertices(Subgraph *g)
 {
-    // We will check 4 cases:
-
-    // 1. The longest path is from the start vertex to one of its descendants.
-    vertex start = g->get_vertices().front();                                        // Start from the first vertex in the MST
-    double path_from_start = find_longest_path(g, start, g->get_vertex_count() + 1); // start vx has no parent (g->get_vertex_count() + 1)
-
-    // 2. The longest path goes through the start vertex.
-    double path_from_start_with_childs = 0;
-    std::list<std::pair<vertex, weight>> neighbours = g->get_neighbors(start);
-    if (neighbours.size() > 1)
-    {
-        // Sort the neighbours by weight in descending order
-        neighbours.sort([](const std::pair<vertex, weight> &a, const std::pair<vertex, weight> &b)
-                        { return a.second > b.second; });
-        // Get the two neighbours with the highest weights
-        path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
-        neighbours.pop_front();
-        path_from_start_with_childs += neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
-    }
-    else if (neighbours.size() == 1) // If there's only one neighbour
-    {
-        path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
-    }
-
-    // 3. The longest path is from one of the start vertex's descendants to another descendant, but doesn't go through the start vertex.
-    double path_from_childs = 0;
-    for (auto v : g->get_neighbors(start))
-    {
-        double path = longest_distance_between_two_vertices(g, v.first, start);
-        if (path > path_from_childs)
-            path_from_childs = path;
-    }
-
-    return std::max({path_from_start, path_from_childs, path_from_start_with_childs, 0.0});
+    return longest_and_farthest(g, 0, g->get_vertex_count()).first;
 }
 
 double average_distance_between_two_vertices(Subgraph *g)
