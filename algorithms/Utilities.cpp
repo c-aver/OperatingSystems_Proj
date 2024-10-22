@@ -65,6 +65,8 @@ std::pair<double, double> longest_and_farthest(Subgraph *g, vertex v, vertex par
         u_farthest += w;
         if (u_longest > child_longest)
             child_longest = u_longest;
+
+        // Find the two farthest vertices from the current vertex (farthest and second farthest)
         if (u_farthest > farthest)
         {
             second_farthest = farthest;
