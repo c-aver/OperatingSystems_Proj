@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra
+CXXFLAGS = -Wall -Wextra -std=c++17
 ADJ = AdjacencyGraph
 SUBGRAPH = Subgraph
 GRAPH_LIB = Graph.hpp
