@@ -49,6 +49,7 @@ public:
     void add_vertex(vertex v);
     void remove_vertex(vertex v);
     size_t get_vertex_count() const override;
+    bool has_edge(const vertex src, const vertex dst) const;
     weight get_weight(const vertex src, const vertex dst) const override;
     std::list<std::pair<vertex, weight>> get_neighbors(const vertex v) const override;
     weight set_edge(const vertex src, const vertex dst, const weight w) override;
