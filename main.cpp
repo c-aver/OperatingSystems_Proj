@@ -123,22 +123,29 @@ bool handle_user_input(int fd, string input)
                 delete g;
 
             std::vector<Graph::edge> edges;
-            for (size_t i = 0; i < m; ++i)
+            try
             {
-                vertex src, dst;
-                weight w;
-                string received_edge = receive_message(fd);
-                std::istringstream edge_stream(received_edge);
-                cout << "Received edge: " << received_edge << std::endl;
-                if (edge_stream >> src >> dst >> w)
+                for (size_t i = 0; i < m; ++i)
                 {
-                    cout << "Parsed edge: " << src << " " << dst << std::endl;
-                    edges.push_back(Graph::edge(src, dst, w));
+                    vertex src, dst;
+                    weight w;
+                    string received_edge = receive_message(fd);
+                    std::istringstream edge_stream(received_edge);
+                    cout << "Received edge: " << received_edge << std::endl;
+                    if (edge_stream >> src >> dst >> w)
+                    {
+                        cout << "Parsed edge: " << src << " " << dst << " " << w << std::endl;
+                        edges.push_back(Graph::edge(src, dst, w));
+                    }
+                    else
+                    {
+                        cout << "Failed to parse edge: " << received_edge << std::endl;
+                    }
                 }
-                else
-                {
-                    cout << "Failed to parse edge: " << received_edge << std::endl;
-                }
+            }
+            catch (std::runtime_error &e)
+            {
+                std::cout << "Client closed while talking" << std::endl;
             }
             g = new AdjacencyGraph(n, edges);
         }
