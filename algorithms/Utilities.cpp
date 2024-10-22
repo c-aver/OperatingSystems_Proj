@@ -1,10 +1,63 @@
 #include <functional>
+#include <list>
 #include "Utilities.hpp"
+
+using std::list, std::vector;
+
+/*
+ * This function performs a Depth First Search (DFS) on the graph to check connactivity.
+ * This function is used to check if the graph is strongly connected (1 SCC).
+ */
+// void DFS(Graph* g, vertex current, vertex parent, vector<bool> &visited)
+// {
+//     visited[current] = true;
+
+//     // Iterate over all of the current's neighbours
+//     for (auto neighbor : g->get_neighbors(current))
+//     {
+//         if (!visited[neighbor.first] && g->get_weight(neighbor.first, current) != 0)
+//         {
+//             DFS(g, neighbor.first, current, visited);
+//         }
+//     }
+// }
+
+// /*
+//  * This function checks if the graph is strongly connected.
+//  * In order to check if the graph is strongly connected we run DFS on each vertex and check if all of the vertices in the graph were visited.
+//  * @return True if the graph is strongly connected, False otherwise.
+//  */
+// bool is_connected(Graph *g)
+// {
+//     if (g->get_vertex_count() <= 1)
+//     {
+// #ifdef DEBUG
+//         std::cout << "Empty graph is considered connected" << std::endl;
+// #endif
+//         return true;
+//     }
+
+//     // Travarse all of the vertices in the graph and run DFS on each vertex
+//     size_t vertex_count = g->get_vertex_count();
+//     for (size_t i = 0; i < vertex_count; i++)
+//     {
+//         std::vector<bool> visited(vertex_count, false); // Create a visited array for the graph nodes. initialized to false.
+//         std::vector<bool> inStack(vertex_count, false); // Create a stack array for the graph nodes. initialized to false.
+
+//         // DFS(g, i, INFINITY, visited);
+
+//         if (std::find(visited.begin(), visited.end(), false) != visited.end()) // If there is a vertex which wasn't visited
+//         {
+//             return false;
+//         }
+//     }
+//     return true; // The graph is connected if all nodes are visited
+// }
 
 double total_weight(Subgraph *g)
 {
     return std::accumulate(g->get_edges().begin(), g->get_edges().end(), 0.0, [](double acc, Graph::edge e)
-                           { return acc + e.w; });  // The total weight of the MST is the sum of all the edges' weights
+                           { return acc + e.w; }); // The total weight of the MST is the sum of all the edges' weights
 }
 
 /**
@@ -89,7 +142,7 @@ double longest_distance_between_two_vertices(Subgraph *g)
     // We will check 4 cases:
 
     // 1. The longest path is from the start vertex to one of its descendants.
-    vertex start = g->get_vertices().front();   // Start from the first vertex in the MST
+    vertex start = g->get_vertices().front();                                        // Start from the first vertex in the MST
     double path_from_start = find_longest_path(g, start, g->get_vertex_count() + 1); // start vx has no parent (g->get_vertex_count() + 1)
 
     // 2. The longest path goes through the start vertex.
@@ -99,13 +152,13 @@ double longest_distance_between_two_vertices(Subgraph *g)
     {
         // Sort the neighbours by weight in descending order
         neighbours.sort([](const std::pair<vertex, weight> &a, const std::pair<vertex, weight> &b)
-                  { return a.second > b.second; });
+                        { return a.second > b.second; });
         // Get the two neighbours with the highest weights
         path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
         neighbours.pop_front();
         path_from_start_with_childs += neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
     }
-    else if (neighbours.size() == 1)    // If there's only one neighbour
+    else if (neighbours.size() == 1) // If there's only one neighbour
     {
         path_from_start_with_childs = neighbours.front().second + find_longest_path(g, neighbours.front().first, start);
     }
@@ -126,7 +179,7 @@ double average_distance_between_two_vertices(Subgraph *g)
 {
     // The idea: find how many paths go through each edge. Each edge splits the graph into two parts.
     // The number of paths that go through an edge is the number of vertices in one part times the number of vertices in the other part.
-    
+
     std::map<vertex, size_t> descendents;
 
     // A recursive lambda function that sets the number of descendents of each vertex
