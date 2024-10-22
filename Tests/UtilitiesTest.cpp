@@ -50,6 +50,32 @@ TEST_CASE("Test - longest_distance_between_two_vertices")
     CHECK(longest_distance == 3);
 }
 
+TEST_CASE("Test - longest_distance_between_two_vertices with more complicated graph")
+{
+    size_t vertices = 5;
+    std::vector<Graph::edge> edges;
+    Graph::edge e1 = {2, 4, 2};
+    edges.push_back(e1);
+    Graph::edge e2 = {2, 3, 1};
+    edges.push_back(e2);
+    Graph::edge e3 = {2, 0, 1};
+    edges.push_back(e3);
+    Graph::edge e4 = {0, 1, 1};
+    edges.push_back(e4);
+    AdjacencyGraph g(vertices, edges);
+    Subgraph mst(g);
+    for (vertex v = 0; v < vertices; v++)
+    {
+        mst.add_vertex(v);
+    }
+    mst.add_edge(4, 2);
+    mst.add_edge(2, 0);
+    mst.add_edge(2, 3);
+    mst.add_edge(0, 1);
+    double longest_distance = longest_distance_between_two_vertices(&mst);
+    CHECK(longest_distance == 4);
+}
+
 TEST_CASE("Test - average_distance_between_two_vertices")
 {
     size_t vertices = 4;
