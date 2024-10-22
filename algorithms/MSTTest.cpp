@@ -1,4 +1,5 @@
-#pragma once
+#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
 #include <vector>
 #include "Prim.hpp"
 #include "doctest.h"
@@ -6,6 +7,7 @@
 #include "../graphs/Graph.hpp"
 #include "../graphs/AdjacencyGraph.hpp"
 #include "../graphs/Subgraph.hpp"
+
 
 TEST_CASE("check prim's algorithm")
 {
