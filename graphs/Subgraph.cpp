@@ -53,6 +53,14 @@ weight Subgraph::get_weight(const vertex src, const vertex dst) const
     return super.get_weight(src, dst);
 }
 
+bool Subgraph::has_edge(const vertex src, const vertex dst) const
+{
+    if (!has_vertex(src) || !has_vertex(dst))
+        throw vertex_not_in_subgraph_exception(!has_vertex(src) ? dst : src);
+    std::list<vertex> neighbors = adjacency_list.find(src)->second;
+    return std::find(neighbors.begin(), neighbors.end(), dst) != neighbors.end();
+}
+
 std::list<std::pair<vertex, weight>> Subgraph::get_neighbors(const vertex v) const
 {
     if (!has_vertex(v))
