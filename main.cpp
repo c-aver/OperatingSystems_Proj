@@ -159,23 +159,6 @@ bool handle_user_input(int fd, string input)
                     {
                         cout << "Failed to parse edge: " << received_edge << std::endl;
                     }
-                if(send_message(fd, "Enter edge and weight: "))
-                {
-                    throw std::runtime_error("Error sending a message to the client");
-                }
-                vertex src, dst;
-                weight w;
-                string received_edge = receive_message(fd);
-                std::istringstream edge_stream(received_edge);
-                cout << "Received edge: " << received_edge << std::endl;
-                if (edge_stream >> src >> dst >> w)
-                {
-                    cout << "Parsed edge: " << src << " <-> " << dst << " With weight: "<< w <<  std::endl;
-                    edges.push_back(Graph::edge(src, dst, w));
-                }
-                else
-                {
-                    cout << "Failed to parse edge: " << received_edge << std::endl;
                 }
             }
             catch (std::runtime_error &e)
