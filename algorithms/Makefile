@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -ggdb -std=c++17
+CXXFLAGS = -Wall -Wextra -ggdb -std=c++17 -ggdb
 ALGORITHMS = Kruskal Prim
 ALGOS = $(foreach algo, $(ALGORITHMS), $(BUILD_DIR)/$(algo).o)
 UTILS = Utilities

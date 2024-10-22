@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++17
+CXXFLAGS = -Wall -Wextra -Werror -std=c++17 -ggdb
 LEADER_FOLLOWER = leader_follower
 BUILD_DIR = ../build
 

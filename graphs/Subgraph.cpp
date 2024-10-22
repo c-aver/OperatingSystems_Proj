@@ -109,10 +109,9 @@ std::vector<Graph::edge> Subgraph::get_edges() const
     {
         for (auto &[u, w] : this->get_neighbors(v))
         {
-            result.push_back(Graph::edge(v, u, w));
+            if (u < w)
+                result.push_back(Graph::edge(v, u, w));
         }
     }
-    std::sort(result.begin(), result.end());
-    std::unique(result.begin(), result.end());
     return result;
 }
