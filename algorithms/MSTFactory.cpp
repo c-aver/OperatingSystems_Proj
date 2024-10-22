@@ -20,10 +20,10 @@ mst_strat_t *mst_strategy(string algo_name)
     {
         return &kruskal;
     }
-    // else if(algo_name == "prim")
-    // {
-    //     return &prim;
-    // }
+    else if(algo_name == "prim")
+    {
+        return &prim;
+    }
     else
     {
         return nullptr;

@@ -91,6 +91,11 @@ bool handle_user_input(int fd, string input)
         {
             std::shared_lock<std::shared_mutex> graph_lock(graph_mutex);
             mst_strat_t *algo = mst_strategy(algo_name);
+            if (algo == nullptr)
+            {
+                send_message(fd, "Unknown MST algorithm");
+                return false;
+            }
             Subgraph MST_Graph = algo(g);
             #ifdef DEBUG
             std::cout << "MST Graph:" << std::endl;
