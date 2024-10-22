@@ -17,9 +17,14 @@ struct prim_vertex
     {
         return u.cost > this->cost;
     }
+
+    bool operator==(prim_vertex u)
+    {
+        return u.v == this->v && u.cost == this->cost && u.parent == this->parent;
+    }
 };
 
-prim_vertex find_min_cost(std::vector<prim_vertex> costs)
+prim_vertex pop_min(std::vector<prim_vertex> &costs)
 {
     prim_vertex min_cost_pv = costs.front();
     for (prim_vertex pv : costs)
@@ -29,6 +34,7 @@ prim_vertex find_min_cost(std::vector<prim_vertex> costs)
             min_cost_pv = pv;
         }
     }
+    costs.erase(std::find(costs.begin(), costs.end(), min_cost_pv));
     return min_cost_pv;
 }
 
@@ -44,10 +50,6 @@ void modify_neighboors(Graph *g, std::vector<prim_vertex> *costs, prim_vertex pv
                 costs_it->cost = g->get_weight(neighboors_it->first, pv.v);
                 costs_it->parent = pv.v;
             }
-            if (costs_it->v == pv.v)
-            {
-                costs->erase(costs_it);
-            }
         }
     }
 }
@@ -61,9 +63,12 @@ Subgraph prim(Graph *g)
         costs.push_back(prim_vertex{v, std::numeric_limits<weight>::infinity(), std::numeric_limits<vertex>::max()});
     }
     Subgraph result(*g);
+    prim_vertex pv = pop_min(costs);
+    result.add_vertex(pv.v);
+    modify_neighboors(g, &costs, pv);
     while (!costs.empty())
     {
-        prim_vertex pv = find_min_cost(costs);
+        prim_vertex pv = pop_min(costs);
         result.add_vertex(pv.v);
         result.add_edge(pv.v, pv.parent);
         modify_neighboors(g, &costs, pv);
