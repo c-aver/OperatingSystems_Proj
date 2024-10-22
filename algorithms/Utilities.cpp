@@ -113,6 +113,8 @@ double longest_distance_between_two_vertices(Subgraph *g, vertex start, vertex p
     double path_from_childs = 0;
     for (auto v : g->get_neighbors(start))
     {
+        if(v.first == parent)
+            continue;
         double path = longest_distance_between_two_vertices(g, v.first, start);
         if (path > path_from_childs)
             path_from_childs = path;
@@ -195,7 +197,7 @@ double average_distance_between_two_vertices(Subgraph *g)
         size_t m = std::min(descendents[u], descendents[v]); // Get the minimum number of descendents that can go through this edge
         total_weight += m * (g->get_vertex_count() - m) * w; // The amount of paths that go through this edge is m * (n - m)
     }
-    return total_weight / (g->get_vertex_count() * (g->get_vertex_count() - 1)); // The average distance is the total weight divided by the total number of paths
+    return total_weight / ((g->get_vertex_count() * (g->get_vertex_count() - 1)/2) +g->get_vertex_count()) ; // The average distance is the total weight divided by the total number of paths
 }
 
 double shortest_distance_between_two_vertices(Subgraph *g)
