@@ -1,7 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include <vector>
-#include "Prim.hpp"
+#include "../algorithms/Prim.hpp"
 #include "doctest.h"
 
 #include "../graphs/Graph.hpp"
