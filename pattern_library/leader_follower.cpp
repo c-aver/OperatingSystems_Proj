@@ -31,6 +31,9 @@ LeaderFollower::~LeaderFollower()
 
 bool LeaderFollower::add_fd(int fd, Handler handler)
 {
+#ifdef DEBUG
+    std::cout << "Wants to add fd..." << std::endl;
+#endif
     std::lock_guard<std::mutex> vectors_guard(vectors_mutex);
 #ifdef DEBUG
     std::cout << "Adding fd: " << fd << "\n";
@@ -120,15 +123,15 @@ void LeaderFollower::lead()
     {
         std::unique_lock<std::mutex> vectors_lock(vectors_mutex); // lock the vectors, the leader is their sole owner
 #ifdef DEBUG
-                                                                  // std::cout << "Thread " << std::this_thread::get_id() << " is polling (first is " << pfds[0].fd << ")." << std::endl;
+        // std::cout << "Thread " << std::this_thread::get_id() << " is polling (first is " << (pfds.empty() ? "none" : std::to_string(pfds[0].fd)) << ")." << std::endl;
 #endif
-        poll(pfds.data(), pfds.size(), LEADER_FOLLOWER_POLL_TIMEOUT); // poll the fds for events, timeout to check running one in a while
+        poll(pfds.data(), pfds.size(), LEADER_FOLLOWER_POLL_TIMEOUT); // poll the fds for events, timeout to check running one in a while and to unlock the vectors
         for (size_t i = 0; i < this->fds_count; ++i)                  // go through the fds
         {
             if (pfds[i].revents & POLLIN) // if found one with data in
             {
-                promote_leader(); // promote a new leader (you are now busy)
-                vectors_lock.unlock();
+                promote_leader();        // promote a new leader (you are now busy)
+                vectors_lock.unlock();   // don't hold the vectors while handling
                 handlers[i](pfds[i].fd); // handle the fd
 #ifdef DEBUG
                 std::cout << "Thread " << std::this_thread::get_id() << " finished handling and is back to following." << std::endl;
@@ -140,5 +143,6 @@ void LeaderFollower::lead()
                 remove_fd(pfds[i].fd); // remove it from the set
             }
         }
+        vectors_lock.unlock();
     }
 }
