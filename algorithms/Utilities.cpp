@@ -56,8 +56,12 @@ using std::list, std::vector;
 
 double total_weight(Subgraph *g)
 {
-    return std::accumulate(g->get_edges().begin(), g->get_edges().end(), 0.0, [](double acc, Graph::edge e)
-                           { return acc + e.w; }); // The total weight of the MST is the sum of all the edges' weights
+    double result = 0;
+    for (Graph::edge e : g->get_edges())
+    {
+        result += e.w;
+    }
+    return result;
 }
 
 /**
