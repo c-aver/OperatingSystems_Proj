@@ -24,13 +24,15 @@
 #define MAX_USERS 5
 #define MAX_SEGMENT_SIZE 65535
 
-#define DEBUG
+// #define DEBUG
 
 using std::cin, std::cout, std::set, std::string;
 
-Graph *g = nullptr;
+std::unique_ptr<Graph> g = nullptr;
 LeaderFollower lf;
 std::shared_mutex graph_mutex;
+
+volatile bool running = true;
 
 /**
  * @brief Receive a message from the client
@@ -75,7 +77,7 @@ bool handle_user_input(int fd, string input)
                 }
                 return false;
             }
-            if(!is_connected(g))
+            if (!is_connected(g.get()))
             {
                 if (send_message(fd, "The graph is not connected, therefore has no MST\n"))
                 {
@@ -84,7 +86,7 @@ bool handle_user_input(int fd, string input)
                 return false;
             }
         }
-        
+
         string algo_name;
         std::getline(is, algo_name);
         std::stringstream buffer;
@@ -96,14 +98,14 @@ bool handle_user_input(int fd, string input)
                 send_message(fd, "Unknown MST algorithm");
                 return false;
             }
-            Subgraph MST_Graph = algo(g);
-            #ifdef DEBUG
+            Subgraph MST_Graph = algo(g.get());
+#ifdef DEBUG
             std::cout << "MST Graph:" << std::endl;
             for (auto &[u, v, w] : MST_Graph.get_edges())
             {
                 std::cout << "(" << u << ", " << v << ") With weight: " << w << '\n';
             }
-            #endif
+#endif
             double total_MST_weight = total_weight(&MST_Graph);
             double average_distance = average_distance_between_two_vertices(&MST_Graph);
             double shortest_distance = shortest_distance_between_two_vertices(&MST_Graph);
@@ -142,8 +144,6 @@ bool handle_user_input(int fd, string input)
         size_t n = strtoull(param1.c_str(), nullptr, 10), m = strtoull(param2.c_str(), nullptr, 10);
         {
             std::unique_lock<std::shared_mutex> graph_lock(graph_mutex);
-            if (g)
-                delete g;
 
             std::vector<Graph::edge> edges;
             try
@@ -170,7 +170,7 @@ bool handle_user_input(int fd, string input)
             {
                 std::cout << "Client closed while talking" << std::endl;
             }
-            g = new AdjacencyGraph(n, edges);
+            g = std::make_unique<AdjacencyGraph>(n, edges);
         }
         return false;
     }
@@ -273,11 +273,20 @@ bool handle_user_input(int fd, string input)
         lf.remove_fd(fd);
         return true;
     }
+    else if (command == "Kill") // Kill the server
+    {
+        close(fd);
+        lf.remove_fd(fd);
+        running = false;
+        return true;
+    }
     else
     {
         if (send_message(fd, "Unknown command: " + command + "\n"))
         {
-            throw std::runtime_error("Error sending a message to the client");
+            close(fd);
+            lf.remove_fd(fd);
+            return true;
         }
         return false;
     }
@@ -363,7 +372,7 @@ int main()
     }
     std::cout << "Server is listening on port " << PORT << std::endl;
 
-    while (true)
+    while (running)
     {
         new_socket = -1;
         // Accept an incoming connection
