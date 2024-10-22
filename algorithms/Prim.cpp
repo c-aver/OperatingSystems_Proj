@@ -51,6 +51,7 @@ void modify_neighboors(Graph *g, std::vector<prim_vertex> *costs, prim_vertex pv
         }
     }
 }
+
 Subgraph prim(Graph *g)
 {
 
