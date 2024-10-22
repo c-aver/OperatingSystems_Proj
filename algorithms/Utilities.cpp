@@ -8,51 +8,39 @@ using std::list, std::vector;
  * This function performs a Depth First Search (DFS) on the graph to check connactivity.
  * This function is used to check if the graph is strongly connected (1 SCC).
  */
-// void DFS(Graph* g, vertex current, vertex parent, vector<bool> &visited)
-// {
-//     visited[current] = true;
+void DFS(Graph *g, vertex current, vector<bool> &visited)
+{
+    visited[current] = true;
 
-//     // Iterate over all of the current's neighbours
-//     for (auto neighbor : g->get_neighbors(current))
-//     {
-//         if (!visited[neighbor.first] && g->get_weight(neighbor.first, current) != 0)
-//         {
-//             DFS(g, neighbor.first, current, visited);
-//         }
-//     }
-// }
+    // Iterate over all of the current's neighbours
+    for (std::pair neighbor : g->get_neighbors(current))
+    {
+        if (!visited[neighbor.first])
+        {
+            DFS(g, neighbor.first, visited);
+        }
+    }
+}
 
-// /*
-//  * This function checks if the graph is strongly connected.
-//  * In order to check if the graph is strongly connected we run DFS on each vertex and check if all of the vertices in the graph were visited.
-//  * @return True if the graph is strongly connected, False otherwise.
-//  */
-// bool is_connected(Graph *g)
-// {
-//     if (g->get_vertex_count() <= 1)
-//     {
-// #ifdef DEBUG
-//         std::cout << "Empty graph is considered connected" << std::endl;
-// #endif
-//         return true;
-//     }
+bool is_connected(Graph *g)
+{
+    if (g->get_vertex_count() <= 1) // Empty and single vertex graphs are considered connected
+    {
+        return true;
+    }
 
-//     // Travarse all of the vertices in the graph and run DFS on each vertex
-//     size_t vertex_count = g->get_vertex_count();
-//     for (size_t i = 0; i < vertex_count; i++)
-//     {
-//         std::vector<bool> visited(vertex_count, false); // Create a visited array for the graph nodes. initialized to false.
-//         std::vector<bool> inStack(vertex_count, false); // Create a stack array for the graph nodes. initialized to false.
+    // Travarse all of the vertices in the graph and run DFS on each vertex
+    size_t vertex_count = g->get_vertex_count();
+    std::vector<bool> visited(vertex_count, false); // Create a visited array for the graph nodes. initialized to false.
 
-//         // DFS(g, i, INFINITY, visited);
+    DFS(g, 0, visited);
 
-//         if (std::find(visited.begin(), visited.end(), false) != visited.end()) // If there is a vertex which wasn't visited
-//         {
-//             return false;
-//         }
-//     }
-//     return true; // The graph is connected if all nodes are visited
-// }
+    if (std::find(visited.begin(), visited.end(), false) != visited.end()) // If there is a vertex which wasn't visited
+    {
+        return false;
+    }
+    return true; // The graph is connected if all nodes are visited
+}
 
 double total_weight(Subgraph *g)
 {

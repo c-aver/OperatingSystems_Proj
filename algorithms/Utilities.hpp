@@ -39,3 +39,10 @@ double average_distance_between_two_vertices(Subgraph *g);
  */
 double shortest_distance_between_two_vertices(Subgraph *g);
 
+/**
+ * @brief Check if a graph is connected
+ * @param g The graph
+ * @return True if the graph is connected, false otherwise
+ */
+bool is_connected(Graph *g);
+
