@@ -46,6 +46,6 @@ $(UTIL_TEST).o: $(UTIL_TEST).cpp $(UTILS).hpp doctest.h $(GRAPHS_DIR)/$(GRAPH).h
 
 clean:
 	rm -f *.o
-	rm -rf $(BUILD_DIR)/$(UTILS).o $(BUILD_DIR)/$(MST_FACTORY).o $(ALGOS) $(TEST)
+	rm -rf $(BUILD_DIR)/$(UTILS).o $(BUILD_DIR)/$(MST_FACTORY).o $(ALGOS) $(UTIL_TEST) $(MST_TEST)
 
 .PHONY: all clean
