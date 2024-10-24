@@ -13,11 +13,7 @@ struct prim_vertex
     vertex v;
     weight cost;
     vertex parent;
-    inline bool operator<(prim_vertex u)
-    {
-        return u.cost > this->cost;
-    }
-
+    
     bool operator==(prim_vertex u)
     {
         return u.v == this->v && u.cost == this->cost && u.parent == this->parent;
