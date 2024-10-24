@@ -275,6 +275,7 @@ bool handle_user_input(int fd, string input)
     }
     else if (command == "Kill") // Kill the server
     {
+        std::cout << "Client commanded to kill the server" << std::endl;
         close(fd);
         lf.remove_fd(fd);
         running = false;

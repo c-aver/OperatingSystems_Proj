@@ -33,6 +33,8 @@ Graph *g = nullptr;
 std::shared_mutex graph_mutex;
 Reactor r;
 
+volatile bool running = true;
+
 ActiveObject<Subgraph(Graph *)> prim_ao(prim);
 ActiveObject<Subgraph(Graph *)> kruskal_ao(kruskal);
 ActiveObject<double(Subgraph *)> total_ao(total_weight);
@@ -292,6 +294,14 @@ bool handle_user_input(int fd, string input)
         r.remove_fd(fd);
         return true;
     }
+    else if (command == "Kill") // Kill the server
+    {
+        std::cout << "Client commanded to kill the server" << std::endl;
+        close(fd);
+        r.remove_fd(fd);
+        running = false;
+        return true;
+    }
     else
     {
         if (send_message(fd, "Unknown command: " + command + "\n"))
@@ -383,7 +393,7 @@ int main()
     std::cout << "Server is listening on port " << PORT << std::endl;
 
     r.start();
-    while (true)
+    while (running)
     {
         new_socket = -1;
         // Accept an incoming connection
