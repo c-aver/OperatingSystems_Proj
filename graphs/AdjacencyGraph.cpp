@@ -60,7 +60,7 @@ weight AdjacencyGraph::set_edge(const vertex src, const vertex dst, const weight
     weight output = this->adjacency_matrix.at(src).at(dst); // Get the previous weight
     this->adjacency_matrix.at(src).at(dst) = w;
     this->adjacency_matrix.at(dst).at(src) = w;
-    return output;  // Return the previous weight
+    return output; // Return the previous weight
 }
 
 weight AdjacencyGraph::set_edge(const Graph::edge e)

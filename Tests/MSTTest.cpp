@@ -8,7 +8,6 @@
 #include "../graphs/AdjacencyGraph.hpp"
 #include "../graphs/Subgraph.hpp"
 
-
 TEST_CASE("check prim's algorithm")
 {
     size_t vertices = 3;
@@ -22,14 +21,15 @@ TEST_CASE("check prim's algorithm")
     AdjacencyGraph g(vertices, edges);
     Subgraph prim_mst = prim(&g);
     std::list<vertex> mst_vs = prim_mst.get_vertices();
-    for (vertex v = 0; v < vertices; v++)
+    for (vertex v = 0; v < vertices; v++) // Check if all vertices are in the MST
     {
         CHECK(std::find(mst_vs.begin(), mst_vs.end(), v) != mst_vs.end());
     }
+    // Check if the edges are correct
     std::vector<Graph::edge> mst_es = prim_mst.get_edges();
     CHECK(prim_mst.has_edge(0, 1));
     CHECK(prim_mst.has_edge(0, 2));
-    CHECK(!prim_mst.has_edge(2, 1));
+    CHECK_FALSE(prim_mst.has_edge(2, 1));
 }
 
 TEST_CASE("check prim's algorithm")
@@ -48,7 +48,7 @@ TEST_CASE("check prim's algorithm")
     edges.push_back(e5);
     Graph::edge e6 = {4, 5, 2};
     edges.push_back(e6);
-        Graph::edge e7 = {2, 5, 1};
+    Graph::edge e7 = {2, 5, 1};
     edges.push_back(e7);
     Graph::edge e8 = {1, 3, 2};
     edges.push_back(e8);
@@ -59,7 +59,7 @@ TEST_CASE("check prim's algorithm")
     AdjacencyGraph g(vertices, edges);
     Subgraph prim_mst = prim(&g);
     std::list<vertex> mst_vs = prim_mst.get_vertices();
-    for (vertex v = 0; v < vertices; v++)
+    for (vertex v = 0; v < vertices; v++) // Check if all vertices are in the MST
     {
         CHECK(std::find(mst_vs.begin(), mst_vs.end(), v) != mst_vs.end());
     }
@@ -154,7 +154,7 @@ TEST_CASE("check kruskal's algorithm")
     edges.push_back(e5);
     Graph::edge e6 = {4, 5, 2};
     edges.push_back(e6);
-        Graph::edge e7 = {2, 5, 1};
+    Graph::edge e7 = {2, 5, 1};
     edges.push_back(e7);
     Graph::edge e8 = {1, 3, 2};
     edges.push_back(e8);

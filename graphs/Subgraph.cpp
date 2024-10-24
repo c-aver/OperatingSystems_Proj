@@ -95,7 +95,7 @@ void Subgraph::add_edge(const vertex src, const vertex dst)
 {
     if (!has_vertex(src) || !has_vertex(dst))
         throw vertex_not_in_subgraph_exception(!has_vertex(src) ? dst : src);
-    if(super.get_weight(src, dst)==Graph::no_edge)
+    if (super.get_weight(src, dst) == Graph::no_edge)
         return;
     if (std::find(this->adjacency_list.at(src).begin(), this->adjacency_list.at(src).end(), dst) != this->adjacency_list.at(src).end())
         return;

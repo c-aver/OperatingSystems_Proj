@@ -19,7 +19,7 @@ private:
 public:
     vertex_not_in_subgraph_exception(vertex v) : v(v)
     {
-        message = (char *) malloc(sizeof(char)*MESSAGE_LEN);
+        message = (char *)malloc(sizeof(char) * MESSAGE_LEN);
         std::snprintf(message, MESSAGE_LEN, MESSAGE_FORMAT, v);
     }
     ~vertex_not_in_subgraph_exception()
