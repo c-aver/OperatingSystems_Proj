@@ -25,13 +25,13 @@ public:
      * The type used as a handler for reactions to file descriptor events.
      * The function receives as an argument the file descriptor on which the event occured.
      */
-    using Handler = std::function<void(int)>; // TODO: allow different handlers?
+    using Handler = std::function<void(int)>;
 private:
     std::vector<std::thread> pool;
 
     volatile bool running; // not protected by mutex, should be fine since it is only ever written once when destructing
 
-    bool has_leader; // TODO: pointer to leader thread?
+    bool has_leader;
     std::mutex leader_mutex;
     std::condition_variable leader_cond;
 
@@ -39,10 +39,9 @@ private:
     std::vector<Handler> handlers;
     std::vector<struct pollfd> pfds;
     std::mutex vectors_mutex;
-    void reactor_main(); // TODO: needed?
-    void follow();
-    void promote_leader();
-    void lead();
+    void follow(); // Wait to be woken by the leader
+    void promote_leader(); // Wake up a new leader
+    void lead(); // Lead - wait for an event on the fds
 public:
     /**
      * Creates a new leader follower pool, you can add file descriptors to it to start handling events.
@@ -52,7 +51,7 @@ public:
     /**
      * Destroys the pool, will no longer process events in the given fds.
      * Can take up to LEADER_FOLLOWER_POLL_TIMEOUT milliseconds for the leader to stop.
-     * Will block until leader stops and all running handlers finish. // TODO: can make so it doesn't block and just hope they die
+     * Will block until leader stops and all running handlers finish.
      */
     ~LeaderFollower();
 

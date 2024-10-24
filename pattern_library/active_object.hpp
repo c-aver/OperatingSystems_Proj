@@ -72,6 +72,7 @@ public:
     {
         std::unique_lock<std::mutex> queue_lock(queue_mutex);
         queue.emplace(std::make_tuple(args...));
+        queue_cond.notify_all();
         return queue.back().promise.get_future();
     }
 
@@ -141,6 +142,7 @@ public:
     {
         std::unique_lock<std::mutex> queue_lock(queue_mutex);
         queue.emplace(std::make_tuple(args...));
+        queue_cond.notify_all();
         return queue.back().promise.get_future();
     }
 

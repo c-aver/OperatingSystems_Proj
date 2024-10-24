@@ -85,7 +85,7 @@ void LeaderFollower::follow()
 #ifdef DEBUG
     std::cout << "Thread " << std::this_thread::get_id() << " is following." << std::endl;
 #endif
-    while (running) // infinite loop to conitnuously try to be the leader (shows initiative)
+    while (running) // loop to conitnuously try to be the leader (shows initiative)
     {
         if (has_leader) // if there is a leader already
         {
@@ -99,7 +99,7 @@ void LeaderFollower::follow()
             return;
         has_leader = true;    // you are now the leader
         leader_lock.unlock(); // unlock the mutex so others can follow while you lead
-        lead();               // perform the leaders duties // TODO: handle errors by dying?
+        lead();               // perform the leaders duties
         leader_lock.lock();   // after you are done, lock the mutex to check again
     }
 }
